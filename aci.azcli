@@ -1,0 +1,31 @@
+az login
+az account list --output table
+az account set --subscription "Mariusz - MS Internal Consumption"
+az group create --name aci-rg --location canadacentral
+# https://docs.microsoft.com/en-us/azure/container-instances/container-instances-quickstart
+
+myvars='AZP_POOL=DockerAgent AZP_URL=https://dev.azure.com/supermarioworld AZP_TOKEN=TBD AZP_AGENT_NAME=myaciagent05'
+echo $myvars
+
+az container create \
+--resource-group aci-rg \
+--name myaciagent05 \
+--image supermario.azurecr.io/ado-dockeragent:latest \
+--ports 80 \
+--registry-username supermario \
+--registry-password TBD \
+--environment-variables $myvars
+
+az container stop --resource-group aci-rg --name myaciagent03
+az container start --resource-group aci-rg --name myaciagent03
+
+# Build image based on MSFT docker file
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/docker?view=azure-devops#linux
+az acr build --image supermario.azurecr.io/ado-dockeragent:latest \
+  --registry supermario \
+  --file Dockerfile .
+
+# Build image based on BMO docker file
+az acr build --image supermario.azurecr.io/ado-bmo-dockeragent:latest \
+  --registry supermario \
+  --file BMODockerfile .

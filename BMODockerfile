@@ -1,0 +1,62 @@
+FROM ubuntu:18.04
+
+USER root
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
+
+RUN apt-get update \
+&& apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        jq \
+        git \
+        iputils-ping \
+        libcurl4 \
+        libicu60 \
+        libunwind8 \
+        netcat
+
+#install NPM
+RUN apt -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash -
+RUN apt -y install nodejs
+RUN npm install
+
+# confirm that it was successful 
+RUN node -v
+# npm installs automatically 
+RUN npm -v
+
+#install aws CLI
+RUN apt -y install python3-pip
+RUN pip3 install awscli==1.15.52 --upgrade
+#check aws cli version
+RUN aws --v
+
+#install Cypress dependencies
+# RUN apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
+#install Cypress
+# RUN npm install cypress
+# RUN node_modules/.bin/cypress version
+
+#check installed python (comes with ubuntu)
+
+RUN python3 -V
+
+# RUN python -V
+
+#install maven
+
+#RUN apt install maven
+
+#ENV for maven
+
+WORKDIR /azp
+
+COPY ./start.sh .
+RUN chmod +x start.sh
+
+CMD ["./start.sh"]
